@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form</title>
+</head>
+<body>
+    <form action="http://localhost:3000/upload" method="POST" enctype="multipart/form-data">
+        <input name="file" type="file">
+        <input type="submit">
+    </form>
+
+    <form action="http://localhost:3000/pdf" method="POST" enctype="multipart/form-data">
+        <input name="files" type="file" multiple>
+        <input type="submit">
+    </form>
+</body>
+</html>
