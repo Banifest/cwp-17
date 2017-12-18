@@ -3,6 +3,7 @@ const multer  = require('multer');
 const uuid = require('uuid-v4');
 const sharp = require('sharp');
 
+console.log();
 const storage = multer.diskStorage({
                                        destination: './uploads/',
                                        filename: function (req, file, cb)
@@ -27,7 +28,7 @@ const imgStorage = multer.diskStorage({
                                           filename: function (req, file, cb)
                                           {
                                               req.uid = uuid();
-                                              req.uidName = `${req.uid}-master.${file.mimetype.toString().substr(5)}`;
+                                              req.uidName = `${req.uid}-master.${req.uidEnd}`;
                                               cb(null, req.uidName);
                                           }
                                       });
@@ -48,8 +49,14 @@ function pdfFilter (req, file, cb)
 function imgFilter (req, file, cb)
 {
 
-    if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg')
+    if(file.mimetype === 'image/png')
     {
+        req.uidEnd = 'png';
+        cb(null, true);
+    }
+    else if(file.mimetype === 'image/jpg')
+    {
+        req.uidEnd = 'jpg';
         cb(null, true);
     }
     else
@@ -64,6 +71,7 @@ const imgUpload = multer({ storage: imgStorage, fileFilter: imgFilter});
 
 const app = express();
 app.use(express.static('static'));
+app.use(express.static('uploads/images'));
 
 app.post('/upload', upload.single('file'), (req, res, next) => {
     res.json({ succeed: true });
@@ -72,12 +80,16 @@ app.post('/upload', upload.single('file'), (req, res, next) => {
 app.post('/pdf', pdfUpload.array('files', 3), (req, res, next) =>
 {
     res.json({ succeed: req.uids });
-    uids = [];
 });
 
 app.post('/images', imgUpload.single('imgs'), (req, res, next) =>
 {
-    sharp(req)
+    let thumbnail = `${req.uid}-thumbnail.${req.uidEnd}`;
+    let preview = `${req.uid}-preview.${req.uidEnd}`;
+    let dir = `./uploads/images/`;
+    sharp(`${dir}${req.uidName}`).resize(300,180).toFile(`${dir}${thumbnail}`);
+    sharp(`${dir}${req.uidName}`).resize(800,600).toFile(`${dir}${preview}`);
+    res.json({ succeed: [req.uidName, thumbnail, preview] });
 });
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'));
