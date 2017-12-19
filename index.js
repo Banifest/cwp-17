@@ -18,7 +18,7 @@ const pdfStorage = multer.diskStorage({
                                        {
                                            let id = uuid();
                                            req.uids? req.uids.push(id) : req.uids = [id];
-                                           uids.push(id);
+                                           req.uids.push(id);
                                            cb(null, id);
                                        }
                                    });
